@@ -9,10 +9,11 @@ varying vec2 pos;
 float antialiasing(vec2 center)
 {
     vec2 frag = pos * 0.5 + 0.5;
-    vec2 aaSize = frag / gl_FragCoord.xy * 0.125;
+    vec2 pixel = frag / gl_FragCoord.xy;
+    vec2 aa = pixel * 0.125;
 
-    vec2 from = pos - 3.0 * aaSize;
-    vec2 to = pos + 4.0 * aaSize;
+    vec2 from = pos - 3.0 * aa;
+    float blur = length(pixel) * 2.0;
 
     float alpha = 0.0;
 
@@ -20,7 +21,7 @@ float antialiasing(vec2 center)
     {
         for (float y = 0.0; y < 4.0; y++)
         {
-            alpha += float(distance(from + vec2(x, y) * 2.0 * aaSize, center) <= 0.5) * 0.0625;
+            alpha += clamp(1.0 - (distance(from + vec2(x, y) * 2.0 * aa, center) - 0.5 + blur * 0.5) / blur, 0.0, 1.0) * 0.0625;
         }
     }
 
